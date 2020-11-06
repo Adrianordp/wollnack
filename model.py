@@ -1,4 +1,4 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3
 import numpy as np
 import matplotlib.pyplot as plot
 
@@ -23,19 +23,31 @@ for k in range(N):
     a0       = -0.78 + 0.44*theta[k]
     d0       = 0.3 + 0.9*theta[k]
 
+    # LPV synthesis
+    x[k]     = -a0*x1 + u1
+    yLPV[k]  = d0*x1
+
+    #LTI synthesis
+    yLTI[k] = -a0*yLTI1 + d0*u2
+
     #A = a0 + q
     #B = 1
     #C = q
     #D = d0
+    A_  = np.array([a0, 1])
+    B_  = np.array([1, 0])
+    Ak_ = np.array([0, 1])
+    Bk_ = np.array([0, 1])
+    
+    R = np.matrix([np.concatenate((A_, -B_)),np.concatenate((Bk_, Ak_))])
+    H = np.matrix([np.zeros(2), Bk_])
 
-    # LPV synthesis
-    x[k]  = (0.78 - 0.44*theta[k])*x1 + u1
-    yLPV[k]  = (0.3 + 0.9*theta[k])*x1
+    y_ = np.array(yLPV1, yLPV[k])
+    u_ = np.array(u1, u[k])
 
-    #LTI synthesis
-    yLTI[k] = (0.78 - 0.44*theta[k])*yLTI1 + (0.3 + 0.9*theta[k])*u2
 
     x1 = x[k]
+    yLPV1 = yLPV[k]
     yLTI1 = yLTI[k]
 
     u2 = u1
@@ -48,3 +60,9 @@ ax.plot(t, yLTI)
 ay = fig.add_subplot(2, 1, 2)
 ay.plot(t, theta)
 plot.show()
+print(A_)
+print(B_)
+print(Ak_)
+print(Bk_)
+print(R)
+print(H)
